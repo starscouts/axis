@@ -3,6 +3,7 @@ use clap::Parser;
 use reader::read_file;
 use reader::TokenScanner;
 use lexer::Token;
+use crate::lexer::Literal;
 
 mod cli;
 mod reader;
@@ -70,14 +71,13 @@ fn main() {
                 scanner.advance(1);
                 tokens.push(Token::Dollar)
             },
-            Some('"') => {
-                scanner.advance(1);
-                tokens.push(Token::Quote)
-            },
             Some('\n') => {
                 scanner.advance(1);
                 tokens.push(Token::LineFeed)
             },
+            Some('"') => {
+                tokens.push(Token::Literal(Literal::string_literal_from_scanner(&mut scanner)))
+            }
             Some(_) => tokens.push(Token::Identifier(scanner.advance_word()))
         }
     }

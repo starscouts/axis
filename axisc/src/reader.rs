@@ -30,12 +30,12 @@ pub fn read_file(source: &PathBuf) -> String {
 }
 
 pub struct TokenScanner<'a> {
-    chars: Peekable<Chars<'a>>
+    pub chars: Peekable<Chars<'a>>
 }
 
 impl <'a> TokenScanner<'a> {
     pub fn advance(&mut self, num: usize) -> Option<char> {
-        self.chars.nth(num)
+        self.chars.nth(num - 1)
     }
 
     pub fn peek(&mut self) -> Option<&char> {
