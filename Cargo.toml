@@ -1,0 +1,3 @@
+[workspace]
+members = [ "axis-rt", "axisc" ]
+resolver = "2"
