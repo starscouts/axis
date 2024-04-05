@@ -4,6 +4,7 @@ use std::iter::Peekable;
 use std::path::PathBuf;
 use std::process::exit;
 use std::str::Chars;
+use crate::lexer::Delimiter;
 
 pub fn read_file(source: &PathBuf) -> String {
     let file = File::open(&source).unwrap_or_else(|e| {
@@ -45,12 +46,13 @@ impl <'a> TokenScanner<'a> {
     pub fn advance_word(&mut self) -> String {
         let mut word = String::new();
 
-        while let Some(char) = self.chars.next() {
-            if char.is_ascii_whitespace() {
+        while let Some(char) = self.chars.peek() {
+            if Delimiter::is_delimiter(char) {
                 break;
             }
 
-            word.push(char);
+            word.push(*char);
+            self.chars.next();
         }
 
         word

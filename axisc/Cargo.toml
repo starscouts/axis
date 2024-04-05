@@ -1,6 +1,6 @@
 [package]
 name = "axisc"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 description = "A compiler for the Axis programming language."
 authors = ["Raindrops", "ryze312"]

@@ -3,7 +3,38 @@ use crate::reader::TokenScanner;
 #[derive(Debug)]
 pub enum Token {
     Identifier(String),
+    Keyword(Keyword),
     Literal(Literal),
+    SimpleToken(SimpleToken)
+}
+
+#[derive(Debug)]
+pub enum Delimiter {
+    WhiteSpace,
+    Semicolon,
+    LineFeed,
+    Equals,
+    Invalid
+}
+
+impl Delimiter {
+    pub fn is_delimiter(c: &char) -> bool {
+        matches!(c, ' ' | ';' | '\n' | '=')
+    }
+
+    pub fn from(c: char) -> Self {
+        match c {
+            ' ' => Delimiter::WhiteSpace,
+            ';' => Delimiter::Semicolon,
+            '\n' => Delimiter::LineFeed,
+            '=' => Delimiter::Equals,
+            _ => Delimiter::Invalid
+        }
+    }
+}
+
+#[derive(Debug)]
+pub enum SimpleToken {
     Multiply,
     Divide,
     Pound,
@@ -26,6 +57,17 @@ pub enum Literal {
     Number(f64),
     Boolean(bool),
     Array(Array)
+}
+
+#[derive(Debug)]
+pub enum Keyword {
+    Into,
+    Boolean,
+    Array,
+    Number,
+    String,
+    As,
+    Let,
 }
 
 #[derive(Debug)]

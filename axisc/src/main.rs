@@ -1,9 +1,11 @@
+use std::num::ParseFloatError;
+use std::str::FromStr;
 use cli::Cli;
 use clap::Parser;
 use reader::read_file;
 use reader::TokenScanner;
 use lexer::Token;
-use crate::lexer::Literal;
+use crate::lexer::{Keyword, Literal, SimpleToken};
 
 mod cli;
 mod reader;
@@ -21,64 +23,87 @@ fn main() {
             None => break,
             Some('#') => {
                 scanner.advance(1);
-                tokens.push(Token::Pound)
+                tokens.push(Token::SimpleToken(SimpleToken::Pound))
             },
             Some('*') => {
                 scanner.advance(1);
-                tokens.push(Token::Multiply)
+                tokens.push(Token::SimpleToken(SimpleToken::Multiply))
             },
             Some('-') => {
                 scanner.advance(1);
-                tokens.push(Token::Subtract)
+                tokens.push(Token::SimpleToken(SimpleToken::Subtract))
             },
             Some('+') => {
                 scanner.advance(1);
-                tokens.push(Token::Add)
+                tokens.push(Token::SimpleToken(SimpleToken::Add))
             },
             Some('<') => {
                 scanner.advance(1);
-                tokens.push(Token::LessThan)
+                tokens.push(Token::SimpleToken(SimpleToken::LessThan))
             },
             Some('>') => {
                 scanner.advance(1);
-                tokens.push(Token::GreaterThan)
+                tokens.push(Token::SimpleToken(SimpleToken::GreaterThan))
             },
             Some('=') => {
                 scanner.advance(1);
-                tokens.push(Token::Equals)
+                tokens.push(Token::SimpleToken(SimpleToken::Equals))
             },
             Some(';') => {
                 scanner.advance(1);
-                tokens.push(Token::Semicolon)
+                tokens.push(Token::SimpleToken(SimpleToken::Semicolon))
             },
             Some('/') => {
                 scanner.advance(1);
-                tokens.push(Token::Divide)
+                tokens.push(Token::SimpleToken(SimpleToken::Divide))
             },
             Some('%') => {
                 scanner.advance(1);
-                tokens.push(Token::Percent)
+                tokens.push(Token::SimpleToken(SimpleToken::Percent))
             },
             Some('^') => {
                 scanner.advance(1);
-                tokens.push(Token::Caret)
+                tokens.push(Token::SimpleToken(SimpleToken::Caret))
             },
             Some(':') => {
                 scanner.advance(1);
-                tokens.push(Token::Colon)
+                tokens.push(Token::SimpleToken(SimpleToken::Colon))
             },
             Some('$') => {
                 scanner.advance(1);
-                tokens.push(Token::Dollar)
+                tokens.push(Token::SimpleToken(SimpleToken::Dollar))
             },
             Some('\n') => {
                 scanner.advance(1);
-                tokens.push(Token::LineFeed)
+                tokens.push(Token::SimpleToken(SimpleToken::LineFeed))
             },
             Some('"') => {
                 tokens.push(Token::Literal(Literal::string_literal_from_scanner(&mut scanner)))
+            },
+            Some(' ' | '\n') => {
+                scanner.advance(1);
+            },
+            Some(_) => {
+                let word = scanner.advance_word();
+                let word_number: Result<f64, ParseFloatError> = f64::from_str(&word);
+
+                match word_number {
+                    Ok(n) => tokens.push(Token::Literal(Literal::Number(n))),
+                    Err(_) => match word.as_ref() {
+                        "" => (),
+                        "True" => tokens.push(Token::Literal(Literal::Boolean(true))),
+                        "False" => tokens.push(Token::Literal(Literal::Boolean(false))),
+                        "Into" => tokens.push(Token::Keyword(Keyword::Into)),
+                        "Let" => tokens.push(Token::Keyword(Keyword::Let)),
+                        "As" => tokens.push(Token::Keyword(Keyword::As)),
+                        "String" => tokens.push(Token::Keyword(Keyword::String)),
+                        "Number" => tokens.push(Token::Keyword(Keyword::Number)),
+                        "Array" => tokens.push(Token::Keyword(Keyword::Array)),
+                        "Boolean" => tokens.push(Token::Keyword(Keyword::Boolean)),
+                        _ => tokens.push(Token::Identifier(word))
+                    }
+                }
             }
-            Some(_) => tokens.push(Token::Identifier(scanner.advance_word()))
         }
     }
 
