@@ -52,14 +52,14 @@ dependencies = [
 
 [[package]]
 name = "axis-rt"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "clap",
 ]
 
 [[package]]
 name = "axisc"
-version = "0.0.1"
+version = "0.0.2"
 dependencies = [
  "clap",
 ]
