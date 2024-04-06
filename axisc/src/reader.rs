@@ -15,28 +15,35 @@ pub fn read_file(source: &PathBuf) -> String {
     let mut string = String::from("");
 
     for line in reader.lines() {
-        let mut line = line.unwrap();
+        let line = line.unwrap();
 
-        if let Some(char_index) = line.find("--") {
-            line.truncate(char_index);
-        }
-
-        if !line.is_empty() {
-            string.push_str(line.trim());
-            string.push('\n');
-        }
+        string.push_str(line.trim());
+        string.push('\n');
     }
 
     string
 }
 
 pub struct TokenScanner<'a> {
-    pub chars: Peekable<Chars<'a>>
+    pub chars: Peekable<Chars<'a>>,
+    pub string: &'a str,
+    pub line: usize,
+    pub column: usize,
+    pub file_name: &'a PathBuf
 }
 
 impl <'a> TokenScanner<'a> {
     pub fn advance(&mut self, num: usize) -> Option<char> {
-        self.chars.nth(num - 1)
+        let ch = self.chars.nth(num - 1);
+
+        if ch.map_or(false, |c| c == '\n') {
+            self.line += 1;
+            self.column = 1;
+            ch
+        } else {
+            self.column += 1;
+            ch
+        }
     }
 
     pub fn peek(&mut self) -> Option<&char> {
@@ -52,19 +59,43 @@ impl <'a> TokenScanner<'a> {
             }
 
             word.push(*char);
+            self.column += 1;
             self.chars.next();
         }
 
         word
     }
 
-    pub fn peek_word(&mut self) -> String {
-        todo!(":(")
+    pub fn advance_line(&mut self) -> String {
+        let mut word = String::new();
+
+        while let Some(char) = self.chars.peek() {
+            if char.eq(&'\n') {
+                break;
+            }
+
+            word.push(*char);
+            self.chars.next();
+        }
+
+        word
     }
 
-    pub fn from_string(string: &'a str) -> Self {
+    pub fn from_file_string(string: &'a str, file_name: &'a PathBuf) -> Self {
         Self {
-            chars: string.chars().peekable()
+            chars: string.chars().peekable(),
+            string,
+            column: 1,
+            line: 1,
+            file_name
         }
+    }
+
+    pub fn get_current_line(&self) -> &str {
+        self.string.lines().nth(self.line - 1).unwrap_or_default()
+    }
+
+    pub fn get_line(&self, line: usize) -> &str {
+        self.string.lines().nth(line - 1).unwrap_or_default()
     }
 }
